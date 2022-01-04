@@ -1,0 +1,115 @@
+---
+- name: "ceph_common | Add the OS specific varibles"
+  ansible.builtin.include_vars:
+    file: "{{ hostvars[inventory_hostname]['ansible_os_family'] + '.yml' }}"
+- name: "ceph_common | Set facts about ceph_common role"
+  ansible.builtin.set_fact:
+    ceph_common_package_state: "{{ hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query('[].package_state') | default(omit) }}"
+    ceph_common_settings: "{{ hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query('[].settings[]') | default(omit) }}"
+    ceph_common_keyrings_types: "{{
+      hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query(\"[].keyrings[?type!='client'].type[]\") }}"
+    ceph_common_keyrings_clients: "{{
+      hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query(\"[].keyrings[?type=='client'][]\") }}"
+    ceph_common_keyrings_workdir_bootstrap: "{{
+      hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query(\"[].keyrings[?contains(type, `bootstrap`)]
+      []\") }}"
+    ceph_common_keyrings_workdir_apps: "{{
+      hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query(\"[].keyrings[?contains(`[''mds'', ''mgr'',
+      ''mon'', ''radosgw'']`, type)][]\") }}"
+    ceph_common_rgw_certificate: "{{
+      hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query('[].rgw_certificate | [0]') |
+      default(omit) }}"
+    ceph_common_rbdmap: "{{ hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query('[].rbdmap[]') | default(omit) }}"
+- name: "ceph_common | Assert that ceph_common package state in valid value"
+  ansible.builtin.assert:
+    that:
+      - "ceph_common_package_state_content in ['present', 'latest']"
+    msg: "'package_state' must be in 'present' or 'latest'."
+    quiet: "true"
+  vars:
+    ceph_common_package_state_content:
+      "{{ vars['ceph_common_package_state'] | first() }}"
+  when:
+    - "vars['ceph_common_package_state'] is defined"
+    - "vars['ceph_common_package_state'] != ''"
+- name: "ceph_common | Get RGW certificate info"
+  community.crypto.x509_certificate_info:
+    content: "{{ ceph_common_rgw_certificate_content['data'] }}"
+  register: "ceph_common_rgw_certificate_result"
+  delegate_to: "localhost"
+  vars:
+    ceph_common_rgw_certificate_content:
+      "{{ vars['ceph_common_rgw_certificate'] | first() }}"
+  when:
+    - "vars['ceph_common_rgw_certificate'] is defined"
+    - "vars['ceph_common_rgw_certificate'] != []"
+    - "vars['ceph_common_rgw_certificate'] not in ['{', '_', '']"
+- name: "ceph_common | Assert basic RGW certificate checks: CN"
+  ansible.builtin.assert:
+    that:
+      - "vars['ceph_common_rgw_certificate_result']['subject']['commonName'] !=
+        ''"
+    msg: "Certificate Common Name (CN) is empty"
+    quiet: "true"
+  delegate_to: "localhost"
+  when:
+    - "vars['ceph_common_rgw_certificate_result'] is defined"
+    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
+- name: "ceph_common | Assert basic RGW certificate checks: expiry date"
+  ansible.builtin.assert:
+    that:
+      - "vars['ceph_common_rgw_certificate_result']['expired'] != 'true'"
+    msg: "Certificate expired"
+    quiet: "true"
+  delegate_to: "localhost"
+  when:
+    - "vars['ceph_common_rgw_certificate_result'] is defined"
+    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
+- name: "ceph_common | Assert basic RGW certificate checks: public key"
+  ansible.builtin.assert:
+    that:
+      - "vars['ceph_common_rgw_certificate_result']['public_key_data']['size']
+        != ''"
+    msg: "Public key is not present in PEM bundle (should exists)"
+    quiet: "true"
+  delegate_to: "localhost"
+  when:
+    - "vars['ceph_common_rgw_certificate_result'] is defined"
+    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
+- name: "ceph_common | Create conf.d catalogs"
+  ansible.builtin.file:
+    path: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+- name: "ceph_common | Create Ceph working catalogs"
+  ansible.builtin.file:
+    path: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] }}"
+    state: "directory"
+    owner: "ceph"
+    group: "ceph"
+    mode: "0750"
+- name: "ceph_common | Create Ceph working catalogs"
+  ansible.builtin.file:
+    path: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] ~ '/' ~
+      item }}"
+    state: "directory"
+    owner: "ceph"
+    group: "ceph"
+    mode: "0750"
+  loop: "{{ vars['ceph_common_keyrings_types'] | flatten(levels=1) }}"
+  loop_control:
+    label: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] ~ '/' ~
+      item }}"
+  when:
+    - "item is defined"
+    - "item != ''"

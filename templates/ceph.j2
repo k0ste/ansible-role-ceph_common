@@ -1,0 +1,38 @@
+{{ '## ceph.conf' }}
+{{ '# ' + ansible_managed }}
+{{ '# Do not edit manually' }}
+
+{% for c in vars['ceph_common_settings'] %}
+{% if c.global is defined and c.global != '' %}
+{% for cg in c.global %}
+{% if loop.first %}
+{{ '[global]' }}
+{% endif %}
+{% for k,v in cg.items() %}
+{{ k + ' = ' ~ v }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% if c.client is defined and c.client != '' %}
+{% for cc in c.client %}
+{% for k,v in cc.items() %}
+{% if loop.first %}
+{{ '[client]' }}
+{% endif %}
+{% if k not in ['name', 'settings'] %}
+{{ k + ' = ' ~ v }}
+{% elif k == 'settings' %}
+{% for vv in v %}
+{% for kkk,vvv in vv.items() %}
+{% if loop.first %}
+{{ '' }}
+{{ '[client.' ~ cc.name ~ ']' }}
+{% endif %}
+{{ kkk + ' = ' ~ vvv }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% endfor %}

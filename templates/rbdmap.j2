@@ -1,0 +1,105 @@
+{{ '## rbdmap' }}
+{{ '# ' + ansible_managed }}
+{{ '# Do not edit manually' }}
+
+{% for r in vars['ceph_common_rbdmap'] %}
+{% if (r.pool is defined and r.pool != '') and
+  (r.image is defined and r.image != '') %}
+{% if (r.user is defined and r.user != '') and
+  (r.keyring is defined and r.keyring != '') %}
+{{ r.pool ~ '/' ~ r.image ~ ' id=' ~ r.user ~
+  ',keyring=/etc/ceph/ceph.client.' ~ r.keyring ~ '.keyring' -}}
+{% if r.options is defined and r.options != '' %}
+{% for ro in r.options %}
+{% if loop.first %}
+{{ ',options=\'' -}}
+{% endif %}
+{% if ro.fsid is defined and ro.fsid != '' %}
+{{ 'fsid=' + ro.fsid + ',' -}}
+{% endif %}
+{% if ro.ip is defined and ro.ip != '' %}
+{{ 'ip=' + ro.ip + ',' -}}
+{% endif %}
+{% if ro.share is defined and ro.share == 'true' %}
+{{ 'share,' -}}
+{% endif %}
+{% if ro.noshare is defined and ro.noshare == 'true' %}
+{{ 'noshare,' -}}
+{% endif %}
+{% if ro.crc is defined and ro.crc == 'true' %}
+{{ 'crc,' -}}
+{% endif %}
+{% if ro.nocrc is defined and ro.nocrc == 'true' %}
+{{ 'nocrc,' -}}
+{% endif %}
+{% if ro.tcp_nodelay is defined and ro.tcp_nodelay == 'true' %}
+{{ 'tcp_nodelay,' -}}
+{% endif %}
+{% if ro.notcp_nodelay is defined and ro.notcp_nodelay == 'true' %}
+{{ 'notcp_nodelay,' -}}
+{% endif %}
+{% if ro.mount_timeout is defined and ro.mount_timeout != '' %}
+{{ 'mount_timeout=' ~ ro.mount_timeout ~ ',' -}}
+{% endif %}
+{% if ro.osdkeepalive is defined and ro.osdkeepalive != '' %}
+{{ 'osdkeepalive=' ~ ro.osdkeepalive ~ ',' -}}
+{% endif %}
+{% if ro.osd_idle_ttl is defined and ro.osd_idle_ttl != '' %}
+{{ 'osd_idle_ttl=' ~ ro.osd_idle_ttl ~ ',' -}}
+{% endif %}
+{% if ro.rw is defined and ro.rw == 'true' %}
+{{ 'rw,' -}}
+{% endif %}
+{% if ro.ro is defined and ro.ro == 'true' %}
+{{ 'ro,' -}}
+{% endif %}
+{% if ro.queue_depth is defined and ro.queue_depth != '' %}
+{{ 'queue_depth=' ~ ro.queue_depth ~ ',' -}}
+{% endif %}
+{% if ro.lock_on_read is defined and ro.lock_on_read == 'true' %}
+{{ 'lock_on_read,' -}}
+{% endif %}
+{% if ro.exclusive is defined and ro.exclusive == 'true' %}
+{{ 'exclusive,' -}}
+{% endif %}
+{% if ro.lock_timeout is defined and ro.lock_timeout != '' %}
+{{ 'lock_timeout=' ~ ro.lock_timeout ~ ',' -}}
+{% endif %}
+{% if ro.notrim is defined and ro.notrim == 'true' %}
+{{ 'notrim,' -}}
+{% endif %}
+{% if ro.abort_on_full is defined and ro.abort_on_full == 'true' %}
+{{ 'abort_on_full,' -}}
+{% endif %}
+{% if ro.alloc_size is defined and ro.alloc_size != '' %}
+{{ 'alloc_size=' ~ ro.alloc_size ~ ',' -}}
+{% endif %}
+{% if ro.crush_location is defined and ro.crush_location != '' %}
+{{ 'crush_location=' + ro.crush_location + ',' -}}
+{% endif %}
+{% if ro.read_from_replica is defined and ro.read_from_replica in ['no',
+  'balance', 'localize'] %}
+{{ 'read_from_replica=' + ro.read_from_replica + ',' -}}
+{% endif %}
+{% if ro.compression_hint is defined and ro.compression_hint in ['none',
+  'compressible', 'incompressible'] %}
+{{ 'compression_hint=' + ro.compression_hint + ',' -}}
+{% endif %}
+{% if ro.ms_mode is defined and ro.ms_mode in ['legacy', 'crc', 'prefer-crc',
+  'prefer-secure'] %}
+{{ 'ms_mode=' + ro.ms_mode + ',' -}}
+{% endif %}
+{% if ro.udev is defined and ro.udev == 'true' %}
+{{ 'udev,' -}}
+{% endif %}
+{% if ro.noudev is defined and ro.noudev == 'true' %}
+{{ 'noudev' -}}
+{% endif %}
+{% if loop.last %}
+{{ '\'' }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}

@@ -1,0 +1,10 @@
+---
+- name: "ceph_common | Deploy ceph.conf"
+  ansible.builtin.template:
+    src: "ceph.j2"
+    dest: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] +
+      '/ceph.conf' }}"
+    force: "yes"
+    owner: "root"
+    group: "root"
+    mode: "0644"

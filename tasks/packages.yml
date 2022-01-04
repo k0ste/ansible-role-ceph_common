@@ -1,0 +1,42 @@
+---
+- name: "ceph_common | Install the required packages in Redhat derivatives"
+  block:
+  - name: "ceph_common | Install the required packages for RedHat via yum"
+    ansible.builtin.yum:
+      name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+      state: "{{ ceph_common_package_state_content | default(omit) }}"
+      update_cache: "yes"
+    when:
+      - "hostvars[inventory_hostname]['ansible_pkg_mgr'] == 'yum'"
+  - name: "ceph_common | Install the required packages for RedHat via dnf"
+    ansible.builtin.dnf:
+      name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+      state: "{{ ceph_common_package_state_content | default(omit) }}"
+      update_cache: "yes"
+    when:
+      - "hostvars[inventory_hostname]['ansible_pkg_mgr'] == 'dnf'"
+  vars:
+    ceph_common_package_state_content:
+      "{{ vars['ceph_common_package_state'] | first() }}"
+  when:
+    - "hostvars[inventory_hostname]['ansible_os_family'] == 'RedHat'"
+- name: "ceph_common | Install the required packages in Debian derivatives"
+  ansible.builtin.apt:
+    name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+    state: "{{ ceph_common_package_state_content | default(omit) }}"
+    update_cache: "yes"
+  vars:
+    ceph_common_package_state_content:
+      "{{ vars['ceph_common_package_state'] | first() }}"
+  when:
+    - "hostvars[inventory_hostname]['ansible_os_family'] == 'Debian'"
+- name: "ceph_common | Install the required packages in ArchLinux derivatives"
+  community.general.pacman:
+    name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+    state: "{{ ceph_common_package_state_content | default(omit) }}"
+    update_cache: "yes"
+  vars:
+    ceph_common_package_state_content:
+      "{{ vars['ceph_common_package_state'] | first() }}"
+  when:
+    - "hostvars[inventory_hostname]['ansible_os_family'] == 'Archlinux'"
