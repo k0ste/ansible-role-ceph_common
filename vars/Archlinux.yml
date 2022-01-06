@@ -4,3 +4,4 @@ ceph_common_package:
   - 'ceph-mgr'
 ceph_common_conf_dest: '/etc/ceph'
 ceph_common_workdir_dest: '/var/lib/ceph'
+ceph_common_user_id: '340'
