@@ -1,4 +1,10 @@
 ---
+- name: "ceph_common | Assert that ansible facts gathered successfully"
+  ansible.builtin.assert:
+    that:
+      - "hostvars[inventory_hostname]['ansible_os_family'] is defined"
+    msg: "'ansible_facts' not found. Please enable facts gathering"
+    quiet: "true"
 - name: "ceph_common | Add the OS specific varibles"
   ansible.builtin.include_vars:
     file: "{{ hostvars[inventory_hostname]['ansible_os_family'] + '.yml' }}"
@@ -8,22 +14,22 @@
       community.general.json_query('[].package_state | [0]') | default(omit) }}"
     ceph_common_settings: "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].settings[]') | default(omit) }}"
-    ceph_common_keyrings_types: "{{
-      hostvars[inventory_hostname]['ceph_common'] |
+    ceph_common_keyrings_types:
+      "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query(\"[].keyrings[?type!='client'].type[]\") }}"
-    ceph_common_keyrings_clients: "{{
-      hostvars[inventory_hostname]['ceph_common'] |
+    ceph_common_keyrings_clients:
+      "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query(\"[].keyrings[?type=='client'][]\") }}"
-    ceph_common_keyrings_workdir_bootstrap: "{{
-      hostvars[inventory_hostname]['ceph_common'] |
+    ceph_common_keyrings_workdir_bootstrap:
+      "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query(\"[].keyrings[?contains(type, `bootstrap`)]
       []\") }}"
-    ceph_common_keyrings_workdir_apps: "{{
-      hostvars[inventory_hostname]['ceph_common'] |
+    ceph_common_keyrings_workdir_apps:
+      "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query(\"[].keyrings[?contains(`[''mds'', ''mgr'',
       ''mon'', ''radosgw'']`, type)][]\") }}"
-    ceph_common_rgw_certificate: "{{
-      hostvars[inventory_hostname]['ceph_common'] |
+    ceph_common_rgw_certificate:
+      "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].rgw_certificate | [0]') |
       default(omit) }}"
     ceph_common_rbdmap: "{{ hostvars[inventory_hostname]['ceph_common'] |
@@ -32,13 +38,13 @@
   ansible.builtin.assert:
     that:
       - "vars['ceph_common_package_state'] in ['present', 'latest']"
-    msg: "'package_state' must be in 'present' or 'latest'."
+    msg: "'package_state' must be in 'present' or 'latest'"
     quiet: "true"
   when:
     - "vars['ceph_common_package_state'] is defined"
     - "vars['ceph_common_package_state'] != ''"
 - name: "ceph_common | Set ceph_common package state to present state from
-  empty state"
+    empty state"
   ansible.builtin.set_fact:
     ceph_common_package_state: 'present'
   when:

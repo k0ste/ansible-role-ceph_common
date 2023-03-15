@@ -1,15 +1,17 @@
 ---
 galaxy_info:
+  role_name: "ceph_common"
+  namespace: "none"
   author: "Konstantin Shalygin <k0ste@k0ste.ru>"
-  issue_tracker_url: "https://jira.e2e4.ru/"
+  issue_tracker_url: "https://github.com/k0ste/ansible-role-ceph_common"
   description: "Role for deploy ceph.conf, cephx, rbdmap and RGW certs"
-  company: "LLC Open Technologies"
+  company: "YASB"
   license: "GPL"
   min_ansible_version: "3.0.0"
   platforms:
-    - name: GenericUNIX
+    - name: "EL"
       versions:
-        - any
-  categories:
-    - storage
+        - 'all'
+  galaxy_tags:
+    - 'storage'
 dependencies: []

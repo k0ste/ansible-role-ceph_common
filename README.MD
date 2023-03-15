@@ -10,7 +10,7 @@ Role for deploy:
 
 ## Requirements
 
-* Ansible 3.0.0+;
+* Ansible 3.0.0+
 
 Example configuration
 -------------------------

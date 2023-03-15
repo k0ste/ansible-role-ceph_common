@@ -7,14 +7,14 @@
     - "hostvars[inventory_hostname]['ceph_common'] is defined"
     - "hostvars[inventory_hostname]['ceph_common'] != ''"
     - "hostvars[inventory_hostname]['ceph_common'] |
-       community.general.json_query(vars['ceph_common_install_package']) is
-       defined"
+      community.general.json_query(vars['ceph_common_install_package']) is
+      defined"
     - "hostvars[inventory_hostname]['ceph_common'] |
-       community.general.json_query(vars['ceph_common_install_package']) ==
-       'true'"
+      community.general.json_query(vars['ceph_common_install_package']) ==
+      'true'"
   vars:
-    ceph_common_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
+    ceph_common_install_package: "[] | map(&install_package || 'false', @) |
+      [0]"
 - ansible.builtin.import_tasks:
     file: "deploy_ceph_conf.yml"
   when:
