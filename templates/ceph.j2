@@ -3,9 +3,9 @@
 {{ '# Do not edit manually' }}
 
 {% for c in vars['ceph_common_settings'] %}
-{% if c.global is defined and c.global != '' %}
-{% for cg in c.global %}
-{% if loop.first %}
+{% if c['global'] is defined and c['global'] != '' %}
+{% for cg in c['global'] %}
+{% if loop['first'] %}
 {{ '[global]' }}
 {% endif %}
 {% for k,v in cg.items() %}
@@ -13,10 +13,10 @@
 {% endfor %}
 {% endfor %}
 {% endif %}
-{% if c.client is defined and c.client != '' %}
-{% for cc in c.client %}
+{% if c['client'] is defined and c['client'] != '' %}
+{% for cc in c['client'] %}
 {% for k,v in cc.items() %}
-{% if loop.first %}
+{% if loop['first'] %}
 {{ '[client]' }}
 {% endif %}
 {% if k not in ['name', 'settings'] %}
@@ -24,14 +24,24 @@
 {% elif k == 'settings' %}
 {% for vv in v %}
 {% for kkk,vvv in vv.items() %}
-{% if loop.first %}
+{% if loop['first'] %}
 {{ '' }}
-{{ '[client.' ~ cc.name ~ ']' }}
+{{ '[client.' ~ cc['name'] ~ ']' }}
 {% endif %}
 {{ kkk + ' = ' ~ vvv }}
 {% endfor %}
 {% endfor %}
 {% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% if c['osd'] is defined and c['osd'] != '' %}
+{% for co in c['osd'] %}
+{% if loop['first'] %}
+{{ '[osd]' }}
+{% endif %}
+{% for k,v in co.items() %}
+{{ k + ' = ' ~ v }}
 {% endfor %}
 {% endfor %}
 {% endif %}
