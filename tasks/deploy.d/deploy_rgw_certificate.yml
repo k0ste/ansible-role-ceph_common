@@ -10,4 +10,4 @@
   vars:
     ceph_common_rgw_certificate_content:
       "{{ vars['ceph_common_rgw_certificate'] | first() }}"
-  diff: "false"
+  diff: false

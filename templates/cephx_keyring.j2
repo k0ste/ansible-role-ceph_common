@@ -1,28 +1,28 @@
-{% if item['type'] is defined and item['type'] != '' %}
-{% if item['type'] in ['mds'] %}
-{{ '## ceph.' + item['type'] + '.' ~ item['name'] ~ '.keyring' }}
-{% elif item['type'] in 'client' %}
-{{ '## ceph.client.' ~ item['name'] ~ '.keyring' }}
-{% elif item['type'] in ['mon', 'radosgw', 'mgr'] %}
+{% if cephx['type'] is defined and cephx['type'] != '' %}
+{% if cephx['type'] in ['mds'] %}
+{{ '## ceph.' + cephx['type'] + '.' ~ cephx['name'] ~ '.keyring' }}
+{% elif cephx['type'] in 'client' %}
+{{ '## ceph.client.' ~ cephx['name'] ~ '.keyring' }}
+{% elif cephx['type'] in ['mon', 'radosgw', 'mgr'] %}
 {{ '## keyring' }}
-{% elif item['type'] ~ 'bootstrap(.*)' %}
+{% elif cephx['type'] ~ 'bootstrap(.*)' %}
 {{ '## ceph.keyring' }}
 {% endif %}
 {% endif %}
 {{ '# ' + ansible_managed }}
 {{ '# Do not edit manually' }}
 
-{% if item['key'] is defined and item['key'] != '' %}
-{% if item['type'] is defined and item['type'] != '' %}
-{% if item['type'] in ['mds', 'mgr'] %}
-{{ '[' + item['type'] + '.' ~ item['name'] ~ ']' }}
-{% elif item['type'] in 'mon' %}
+{% if cephx['key'] is defined and cephx['key'] != '' %}
+{% if cephx['type'] is defined and cephx['type'] != '' %}
+{% if cephx['type'] in ['mds', 'mgr'] %}
+{{ '[' + cephx['type'] + '.' ~ cephx['name'] ~ ']' }}
+{% elif cephx['type'] in 'mon' %}
 {{ '[mon.]' }}
-{% elif item['type'] in ['client', 'radosgw'] %}
-{{ '[client.' ~ item['name'] ~ ']' }}
-{% elif item['type'] ~ 'bootstrap(.*)' %}
-{{ '[client.' ~ item['type'] ~ ']' }}
+{% elif cephx['type'] in ['client', 'radosgw'] %}
+{{ '[client.' ~ cephx['name'] ~ ']' }}
+{% elif cephx['type'] ~ 'bootstrap(.*)' %}
+{{ '[client.' ~ cephx['type'] ~ ']' }}
 {% endif %}
 {% endif %}
-{{ '       key = ' + item['key'] }}
+{{ '       key = ' + cephx['key'] }}
 {% endif %}

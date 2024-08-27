@@ -1,0 +1,45 @@
+---
+- name: "ceph_common | Get RGW certificate info"
+  community.crypto.x509_certificate_info:
+    content: "{{ ceph_common_rgw_certificate_content['data'] }}"
+  register: "ceph_common_rgw_certificate_result"
+  delegate_to: "localhost"
+  vars:
+    ceph_common_rgw_certificate_content:
+      "{{ vars['ceph_common_rgw_certificate'] | first() }}"
+  when:
+    - "vars['ceph_common_rgw_certificate'] is defined"
+    - "vars['ceph_common_rgw_certificate'] != []"
+    - "vars['ceph_common_rgw_certificate'] not in ['{', '_', '']"
+- name: "ceph_common | Assert basic RGW certificate checks: CN"
+  ansible.builtin.assert:
+    that:
+      - "vars['ceph_common_rgw_certificate_result']['subject']['commonName'] !=
+        ''"
+    fail_msg: "Certificate Common Name (CN) is empty"
+    quiet: "true"
+  delegate_to: "localhost"
+  when:
+    - "vars['ceph_common_rgw_certificate_result'] is defined"
+    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
+- name: "ceph_common | Assert basic RGW certificate checks: expiry date"
+  ansible.builtin.assert:
+    that:
+      - "vars['ceph_common_rgw_certificate_result']['expired'] != 'true'"
+    fail_msg: "Certificate expired"
+    quiet: "true"
+  delegate_to: "localhost"
+  when:
+    - "vars['ceph_common_rgw_certificate_result'] is defined"
+    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
+- name: "ceph_common | Assert basic RGW certificate checks: public key"
+  ansible.builtin.assert:
+    that:
+      - "vars['ceph_common_rgw_certificate_result']['public_key_data']['size']
+        != ''"
+    fail_msg: "Public key is not present in PEM bundle (should exists)"
+    quiet: "true"
+  delegate_to: "localhost"
+  when:
+    - "vars['ceph_common_rgw_certificate_result'] is defined"
+    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"

@@ -3,15 +3,18 @@
   ansible.builtin.assert:
     that:
       - "hostvars[inventory_hostname]['ansible_os_family'] is defined"
-    msg: "'ansible_facts' not found. Please enable facts gathering"
+    fail_msg: "'ansible_facts' not found. Please enable facts gathering"
     quiet: "true"
 - name: "ceph_common | Add the OS specific varibles"
   ansible.builtin.include_vars:
     file: "{{ hostvars[inventory_hostname]['ansible_os_family'] + '.yml' }}"
 - name: "ceph_common | Set facts about ceph_common role"
   ansible.builtin.set_fact:
+    ceph_common_mgr_systemd_dir: "/etc/systemd/system/ceph-mgr@.service.d"
     ceph_common_package_state: "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].package_state | [0]') | default(omit) }}"
+    ceph_common_systemd: "{{ hostvars[inventory_hostname]['ceph_common'] |
+      community.general.json_query('[].systemd[] | [0]') | default(omit) }}"
     ceph_common_settings: "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].settings[]') | default(omit) }}"
     ceph_common_keyrings_types:
@@ -38,7 +41,7 @@
   ansible.builtin.assert:
     that:
       - "vars['ceph_common_package_state'] in ['present', 'latest']"
-    msg: "'package_state' must be in 'present' or 'latest'"
+    fail_msg: "'package_state' must be in 'present' or 'latest'"
     quiet: "true"
   when:
     - "vars['ceph_common_package_state'] is defined"
@@ -50,50 +53,9 @@
   when:
     - "vars['ceph_common_package_state'] is defined"
     - "vars['ceph_common_package_state'] == ''"
-- name: "ceph_common | Get RGW certificate info"
-  community.crypto.x509_certificate_info:
-    content: "{{ ceph_common_rgw_certificate_content['data'] }}"
-  register: "ceph_common_rgw_certificate_result"
-  delegate_to: "localhost"
-  vars:
-    ceph_common_rgw_certificate_content:
-      "{{ vars['ceph_common_rgw_certificate'] | first() }}"
-  when:
-    - "vars['ceph_common_rgw_certificate'] is defined"
-    - "vars['ceph_common_rgw_certificate'] != []"
-    - "vars['ceph_common_rgw_certificate'] not in ['{', '_', '']"
-- name: "ceph_common | Assert basic RGW certificate checks: CN"
-  ansible.builtin.assert:
-    that:
-      - "vars['ceph_common_rgw_certificate_result']['subject']['commonName'] !=
-        ''"
-    msg: "Certificate Common Name (CN) is empty"
-    quiet: "true"
-  delegate_to: "localhost"
-  when:
-    - "vars['ceph_common_rgw_certificate_result'] is defined"
-    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
-- name: "ceph_common | Assert basic RGW certificate checks: expiry date"
-  ansible.builtin.assert:
-    that:
-      - "vars['ceph_common_rgw_certificate_result']['expired'] != 'true'"
-    msg: "Certificate expired"
-    quiet: "true"
-  delegate_to: "localhost"
-  when:
-    - "vars['ceph_common_rgw_certificate_result'] is defined"
-    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
-- name: "ceph_common | Assert basic RGW certificate checks: public key"
-  ansible.builtin.assert:
-    that:
-      - "vars['ceph_common_rgw_certificate_result']['public_key_data']['size']
-        != ''"
-    msg: "Public key is not present in PEM bundle (should exists)"
-    quiet: "true"
-  delegate_to: "localhost"
-  when:
-    - "vars['ceph_common_rgw_certificate_result'] is defined"
-    - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
+- name: "ceph_common | Import RGW cert checks"
+  ansible.builtin.import_tasks:
+    file: "prereq.d/rgw_cert_checks.yml"
 - name: "ceph_common | Create conf.d catalogs"
   ansible.builtin.file:
     path: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] }}"
@@ -111,15 +73,29 @@
 - name: "ceph_common | Create Ceph working catalogs"
   ansible.builtin.file:
     path: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] ~ '/' ~
-      item }}"
+      ceph_dir }}"
     state: "directory"
     owner: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     group: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     mode: "0750"
   loop: "{{ vars['ceph_common_keyrings_types'] | flatten(levels=1) }}"
   loop_control:
-    label: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] ~ '/' ~
-      item }}"
+    loop_var: "ceph_dir"
+    label: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] + '/' ~
+      ceph_dir }}"
   when:
-    - "item is defined"
-    - "item != ''"
+    - "ceph_dir is defined"
+    - "ceph_dir != []"
+    - "ceph_dir != ''"
+- name: "ceph_common | Create override systemd service directory"
+  ansible.builtin.file:
+    path: "{{ vars['ceph_common_mgr_systemd_dir'] }}"
+    state: "directory"
+    group: "root"
+    owner: "root"
+    mode: "0755"
+    recurse: "no"
+  when:
+    - "vars['ceph_common_systemd'] is defined"
+    - "vars['ceph_common_systemd'] != []"
+    - "vars['ceph_common_systemd'] != ''"

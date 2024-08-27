@@ -25,6 +25,14 @@ ceph_common:
     package_state: 'present'
 # Enable rbdmap service or not
     rbdmap_enable: 'false'
+# systemd service resource settings. With this settings possible to override
+# system defaults and limit Ceph services in resources, for example to save
+# host of memory leaks (see `man systemd.resource-control`)
+    systemd:
+# Set ceph-mgr service limits
+      - mgr:
+# Set memory limit (may be bytes or percents)
+          - memory_max: '40%'
     settings:
 # [global] in ceph.conf, all options passed as-is without any validation
       - global:

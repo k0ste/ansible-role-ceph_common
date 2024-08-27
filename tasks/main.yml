@@ -1,7 +1,9 @@
 ---
-- ansible.builtin.import_tasks:
+- name: "ceph_common | Import pre requisite tasks"
+  ansible.builtin.import_tasks:
     file: "pre_requisite.yml"
-- ansible.builtin.include_tasks:
+- name: "ceph_common | Include packages tasks"
+  ansible.builtin.include_tasks:
     file: "packages.yml"
   when:
     - "hostvars[inventory_hostname]['ceph_common'] is defined"
@@ -15,27 +17,40 @@
   vars:
     ceph_common_install_package: "[] | map(&install_package || 'false', @) |
       [0]"
-- ansible.builtin.import_tasks:
-    file: "deploy_ceph_conf.yml"
+- name: "ceph_common | Include ceph.conf deployment tasks"
+  ansible.builtin.include_tasks:
+    file: "deploy.d/deploy_ceph_conf.yml"
   when:
     - "vars['ceph_common_settings'] is defined"
     - "vars['ceph_common_settings'] != []"
     - "vars['ceph_common_settings'] != ''"
-- ansible.builtin.import_tasks:
-    file: "deploy_ceph_rbdmap.yml"
+- name: "ceph_common | Include systemd deployment tasks"
+  ansible.builtin.include_tasks:
+    file: "deploy.d/deploy_systemd_override.yml"
+  when:
+    - "vars['ceph_common_systemd'] is defined"
+    - "vars['ceph_common_systemd'] != []"
+    - "vars['ceph_common_systemd'] != ''"
+- name: "ceph_common | Include rpdmap deployment tasks"
+  ansible.builtin.include_tasks:
+    file: "deploy.d/deploy_ceph_rbdmap.yml"
   when:
     - "vars['ceph_common_rbdmap'] is defined"
     - "vars['ceph_common_rbdmap'] != []"
     - "vars['ceph_common_rbdmap'] != ''"
-- ansible.builtin.import_tasks:
-    file: "deploy_cephx_keyring_etc.yml"
+- name: "ceph_common | Include cephx clients deployment tasks"
+  ansible.builtin.include_tasks:
+    file: "deploy.d/deploy_cephx_keyring_etc.yml"
   when:
     - "vars['ceph_common_keyrings_clients'] is defined"
     - "vars['ceph_common_keyrings_clients'] != []"
-- ansible.builtin.import_tasks:
-    file: "deploy_cephx_keyring_workdir.yml"
-- ansible.builtin.import_tasks:
-    file: "deploy_rgw_certificate.yml"
+    - "vars['ceph_common_keyrings_clients'] != ''"
+- name: "ceph_common | Include cephx apps deployment tasks"
+  ansible.builtin.import_tasks:
+    file: "deploy.d/deploy_cephx_keyring_workdir.yml"
+- name: "ceph_common | Include RGW certificate deployment tasks"
+  ansible.builtin.include_tasks:
+    file: "deploy.d/deploy_rgw_certificate.yml"
   when:
     - "vars['ceph_common_rgw_certificate_result'] is defined"
     - "vars['ceph_common_rgw_certificate_result']['skipped'] is not defined"
