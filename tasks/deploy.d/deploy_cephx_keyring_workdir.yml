@@ -2,39 +2,41 @@
 - name: "ceph_common | Create Ceph working catalogs for Ceph client apps"
   ansible.builtin.file:
     path: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] + '/' +
-      item['type'] + '/ceph-' ~ item['name'] }}"
+      cephx['type'] + '/ceph-' ~ cephx['name'] }}"
     state: "directory"
     owner: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     group: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     mode: "0750"
   loop: "{{ vars['ceph_common_keyrings_workdir_apps'] | flatten(levels=1) }}"
   loop_control:
+    loop_var: "cephx"
     label: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] + '/' +
-      item['type'] + '/ceph-' ~ item['name'] }}"
+      cephx['type'] + '/ceph-' ~ cephx['name'] }}"
   when:
-    - "item['name'] is defined"
-    - "item['name'] != ''"
+    - "cephx['name'] is defined"
+    - "cephx['name'] != ''"
 - name: "ceph_common | Deploy cephx keyring for Ceph client apps"
   ansible.builtin.template:
     src: "cephx_keyring.j2"
     dest: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] + '/' +
-      item['type'] + '/ceph-' ~ item['name'] ~ '/keyring' }}"
+      cephx['type'] + '/ceph-' ~ cephx['name'] ~ '/keyring' }}"
     force: "yes"
     owner: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     group: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     mode: "0400"
   loop: "{{ vars['ceph_common_keyrings_workdir_apps'] | flatten(levels=1) }}"
   loop_control:
+    loop_var: "cephx"
     label: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] + '/' +
-      item['type'] + '/ceph-' ~ item['name'] ~ '/keyring' }}"
+      cephx['type'] + '/ceph-' ~ cephx['name'] ~ '/keyring' }}"
   when:
-    - "item['name'] is defined"
-    - "item['name'] != ''"
+    - "cephx['name'] is defined"
+    - "cephx['name'] != ''"
 - name: "ceph_common | Deploy cephx bootstrap keyring"
   ansible.builtin.template:
     src: "cephx_keyring.j2"
     dest: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] + '/' +
-      item['type'] + '/ceph.keyring' }}"
+      cephx['type'] + '/ceph.keyring' }}"
     force: "yes"
     owner: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     group: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
@@ -42,8 +44,9 @@
   loop: "{{ vars['ceph_common_keyrings_workdir_bootstrap'] |
     flatten(levels=1) }}"
   loop_control:
+    loop_var: "cephx"
     label: "{{ hostvars[inventory_hostname]['ceph_common_workdir_dest'] + '/' +
-      item['type'] + '/ceph.keyring' }}"
+      cephx['type'] + '/ceph.keyring' }}"
   when:
-    - "item['name'] is defined"
-    - "item['name'] != ''"
+    - "cephx['name'] is defined"
+    - "cephx['name'] != ''"
