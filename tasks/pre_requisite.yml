@@ -11,6 +11,8 @@
 - name: "ceph_common | Set facts about ceph_common role"
   ansible.builtin.set_fact:
     ceph_common_mgr_systemd_dir: "/etc/systemd/system/ceph-mgr@.service.d"
+    ceph_common_exporter_systemd_dir:
+      "/etc/systemd/system/ceph-exporter.service.d"
     ceph_common_package_state: "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].package_state | [0]') | default(omit) }}"
     ceph_common_systemd: "{{ hostvars[inventory_hostname]['ceph_common'] |
@@ -87,7 +89,7 @@
     - "ceph_dir is defined"
     - "ceph_dir != []"
     - "ceph_dir != ''"
-- name: "ceph_common | Create override systemd service directory"
+- name: "ceph_common | Create override mgr systemd service directory"
   ansible.builtin.file:
     path: "{{ vars['ceph_common_mgr_systemd_dir'] }}"
     state: "directory"
@@ -96,6 +98,19 @@
     mode: "0755"
     recurse: "no"
   when:
-    - "vars['ceph_common_systemd'] is defined"
-    - "vars['ceph_common_systemd'] != []"
-    - "vars['ceph_common_systemd'] != ''"
+
+    - "vars['ceph_common_systemd']['mgr'] is defined"
+    - "vars['ceph_common_systemd']['mgr'] != []"
+    - "vars['ceph_common_systemd']['mgr'] != ''"
+- name: "ceph_common | Create override exporter systemd service directory"
+  ansible.builtin.file:
+    path: "{{ vars['ceph_common_exporter_systemd_dir'] }}"
+    state: "directory"
+    group: "root"
+    owner: "root"
+    mode: "0755"
+    recurse: "no"
+  when:
+    - "vars['ceph_common_systemd']['exporter'] is defined"
+    - "vars['ceph_common_systemd']['exporter'] != []"
+    - "vars['ceph_common_systemd']['exporter'] != ''"
