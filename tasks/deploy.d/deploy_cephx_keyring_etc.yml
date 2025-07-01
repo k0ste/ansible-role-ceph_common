@@ -5,8 +5,8 @@
     dest: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] +
       '/ceph.client.' ~ cephx['name'] ~ '.keyring' }}"
     force: "yes"
-    owner: "root"
-    group: "root"
+    owner: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
+    group: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
     mode: "0400"
   loop: "{{ vars['ceph_common_keyrings_clients'] | flatten(levels=1) }}"
   loop_control:
