@@ -1,0 +1,10 @@
+{{ '## ceph-exporter.service' }}
+{{ '# ' + ansible_managed }}
+{{ '# Do not edit manually' }}
+
+{{ '[Service]' }}
+{% for o in vars['ceph_common_systemd']['exporter'] %}
+{% for k,v in o.items() %}
+{{ (k.split('_') | map('capitalize') | join) + '=' + v }}
+{% endfor %}
+{% endfor %}
