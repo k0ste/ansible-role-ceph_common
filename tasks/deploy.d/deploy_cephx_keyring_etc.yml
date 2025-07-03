@@ -11,8 +11,9 @@
   loop: "{{ vars['ceph_common_keyrings_clients'] | flatten(levels=1) }}"
   loop_control:
     loop_var: "cephx"
-    label: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] +
-      '/ceph.client.' ~ cephx['name'] ~ '.keyring' }}"
+    label: "{{ 'Keyring: ' +
+      hostvars[inventory_hostname]['ceph_common_conf_dest'] + '/ceph.client.' ~
+      cephx['name'] ~ '.keyring' }}"
   when:
     - "cephx['name'] is defined"
     - "cephx['name'] != []"

@@ -1,22 +1,35 @@
 ---
-- name: "ceph_common | Install the required packages for RedHat via dnf"
-  ansible.builtin.dnf:
-    name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
-    state: "{{ vars['ceph_common_package_state'] | default(omit) }}"
-    update_cache: "yes"
+- name: "ceph_common | Install the required packages in Redhat derivatives"
   when:
     - "hostvars[inventory_hostname]['ansible_os_family'] == 'RedHat'"
+  block:
+    - name: "ceph_common | Update dnf cache"
+      ansible.builtin.dnf:
+        update_cache: "yes"
+    - name: "ceph_common | Install package with dnf"
+      ansible.builtin.dnf:
+        name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+        state: "{{ vars['ceph_common_package_state'] | default(omit) }}"
 - name: "ceph_common | Install the required packages in Debian derivatives"
-  ansible.builtin.apt:
-    name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
-    state: "{{ vars['ceph_common_package_state'] | default(omit) }}"
-    update_cache: "yes"
   when:
     - "hostvars[inventory_hostname]['ansible_os_family'] == 'Debian'"
-- name: "ceph_common | Install the required packages in ArchLinux derivatives"
-  community.general.pacman:
-    name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
-    state: "{{ vars['ceph_common_package_state'] | default(omit) }}"
-    update_cache: "yes"
+  block:
+    - name: "ceph_common | Update apt cache"
+      ansible.builtin.apt:
+        update_cache: "yes"
+    - name: "ceph_common | Install package with apt"
+      ansible.builtin.apt:
+        name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+        state: "{{ vars['ceph_common_package_state'] | default(omit) }}"
+- name: "ceph_common | Install the required packages in ArchLinux
+    derivatives"
   when:
     - "hostvars[inventory_hostname]['ansible_os_family'] == 'Archlinux'"
+  block:
+    - name: "ceph_common | Update pacman cache"
+      community.general.pacman:
+        update_cache: "yes"
+    - name: "ceph_common | Install package with pacman"
+      community.general.pacman:
+        name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+        state: "{{ vars['ceph_common_package_state'] | default(omit) }}"

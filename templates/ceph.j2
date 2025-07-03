@@ -35,6 +35,16 @@
 {% endfor %}
 {% endfor %}
 {% endif %}
+{% if c['mon'] is defined and c['mon'] != '' %}
+{% for cm in c['mon'] %}
+{% if loop['first'] %}
+{{ '[mon]' }}
+{% endif %}
+{% for k,v in cm.items() %}
+{{ k + ' = ' ~ v }}
+{% endfor %}
+{% endfor %}
+{% endif %}
 {% if c['osd'] is defined and c['osd'] != '' %}
 {% for co in c['osd'] %}
 {% if loop['first'] %}

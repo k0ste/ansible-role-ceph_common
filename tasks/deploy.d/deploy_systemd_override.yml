@@ -1,27 +1,7 @@
 ---
-- name: "ceph_common | Deploy ceph-mgr service configuration"
-  ansible.builtin.template:
-    src: "ceph_mgr_service.j2"
-    dest: "{{ vars['ceph_common_mgr_systemd_dir'] + '/override.conf' }}"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-  notify:
-    - "Daemon reload"
-  when:
-    - "vars['ceph_common_systemd']['mgr'] is defined"
-    - "vars['ceph_common_systemd']['mgr'] != []"
-    - "vars['ceph_common_systemd']['mgr'] != ''"
-- name: "ceph_common | Deploy ceph-exporter service configuration"
-  ansible.builtin.template:
-    src: "ceph_exporter_service.j2"
-    dest: "{{ vars['ceph_common_exporter_systemd_dir'] + '/override.conf' }}"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-  notify:
-    - "Daemon reload"
-  when:
-    - "vars['ceph_common_systemd']['exporter'] is defined"
-    - "vars['ceph_common_systemd']['exporter'] != []"
-    - "vars['ceph_common_systemd']['exporter'] != ''"
+- name: "ceph_common | Include systemd deployment tasks [ceph-exporter]"
+  ansible.builtin.import_tasks:
+    file: "deploy.d/systemd.d/ceph_exporter.yml"
+- name: "ceph_common | Include systemd deployment tasks [ceph-mgr]"
+  ansible.builtin.import_tasks:
+    file: "deploy.d/systemd.d/ceph_mgr.yml"

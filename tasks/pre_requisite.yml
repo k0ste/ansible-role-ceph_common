@@ -10,12 +10,10 @@
     file: "{{ hostvars[inventory_hostname]['ansible_os_family'] + '.yml' }}"
 - name: "ceph_common | Set facts about ceph_common role"
   ansible.builtin.set_fact:
-    ceph_common_mgr_systemd_dir: "/etc/systemd/system/ceph-mgr@.service.d"
-    ceph_common_exporter_systemd_dir:
-      "/etc/systemd/system/ceph-exporter.service.d"
+    ceph_common_systemd_dir: "/etc/systemd/system"
     ceph_common_package_state: "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].package_state | [0]') | default(omit) }}"
-    ceph_common_systemd: "{{ hostvars[inventory_hostname]['ceph_common'] |
+    ceph_common_systemd: "{{ ceph_common |
       community.general.json_query('[].systemd[] | [0]') | default(omit) }}"
     ceph_common_settings: "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].settings[]') | default(omit) }}"
@@ -89,28 +87,27 @@
     - "ceph_dir is defined"
     - "ceph_dir != []"
     - "ceph_dir != ''"
-- name: "ceph_common | Create override mgr systemd service directory"
+- name: "ceph_common | Create override systemd service directory [ceph-mgr]"
   ansible.builtin.file:
-    path: "{{ vars['ceph_common_mgr_systemd_dir'] }}"
+    path: "{{ vars['ceph_common_systemd_dir'] + '/ceph-mgr@.service.d' }}"
     state: "directory"
     group: "root"
     owner: "root"
     mode: "0755"
     recurse: "no"
   when:
-
     - "vars['ceph_common_systemd']['mgr'] is defined"
     - "vars['ceph_common_systemd']['mgr'] != []"
     - "vars['ceph_common_systemd']['mgr'] != ''"
-- name: "ceph_common | Create override exporter systemd service directory"
+- name: "ceph_common | Create override systemd service directory
+    [ceph-exporter]"
   ansible.builtin.file:
-    path: "{{ vars['ceph_common_exporter_systemd_dir'] }}"
+    path: "{{ vars['ceph_common_systemd_dir'] + '/ceph-exporter.service.d' }}"
     state: "directory"
     group: "root"
     owner: "root"
     mode: "0755"
     recurse: "no"
   when:
-    - "vars['ceph_common_systemd']['exporter'] is defined"
-    - "vars['ceph_common_systemd']['exporter'] != []"
-    - "vars['ceph_common_systemd']['exporter'] != ''"
+    - "vars['ceph_common_systemd']['exporter_hotfix'] is defined"
+    - "vars['ceph_common_systemd']['exporter_hotfix'] == 'true'"

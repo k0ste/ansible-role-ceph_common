@@ -30,13 +30,12 @@ ceph_common:
 # host of memory leaks (see `man systemd.resource-control`)
     systemd:
 # Set ceph-mgr service limits
-      mgr:
+      - mgr:
 # Set memory limit (may be bytes or percents)
           - memory_max: '40%'
-# Set ceph-exporter service arguments
-      ceph-exporter:
-# Set exec start arguments
-          - exec_start: '/usr/bin/ceph-exporter --no-mon-config'
+# Set ceph-exporter service override
+# See: https://tracker.ceph.com/issues/71922
+        exporter_hotfix: 'true'
     settings:
 # [global] in ceph.conf, all options passed as-is without any validation
       - global:
