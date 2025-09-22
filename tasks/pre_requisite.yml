@@ -45,14 +45,18 @@
     quiet: "true"
   when:
     - "vars['ceph_common_package_state'] is defined"
+    - "vars['ceph_common_package_state'] != []"
     - "vars['ceph_common_package_state'] != ''"
+    - "vars['ceph_common_package_state'] != None"
 - name: "ceph_common | Set ceph_common package state to present state from
     empty state"
   ansible.builtin.set_fact:
     ceph_common_package_state: 'present'
   when:
     - "vars['ceph_common_package_state'] is defined"
+    - "vars['ceph_common_package_state'] == []"
     - "vars['ceph_common_package_state'] == ''"
+    - "vars['ceph_common_package_state'] == None"
 - name: "ceph_common | Import RGW cert checks"
   ansible.builtin.import_tasks:
     file: "prereq.d/rgw_cert_checks.yml"
@@ -87,6 +91,7 @@
     - "ceph_dir is defined"
     - "ceph_dir != []"
     - "ceph_dir != ''"
+    - "ceph_dir != None"
 - name: "ceph_common | Create override systemd service directory [ceph-mgr]"
   ansible.builtin.file:
     path: "{{ vars['ceph_common_systemd_dir'] + '/ceph-mgr@.service.d' }}"
@@ -99,6 +104,7 @@
     - "vars['ceph_common_systemd']['mgr'] is defined"
     - "vars['ceph_common_systemd']['mgr'] != []"
     - "vars['ceph_common_systemd']['mgr'] != ''"
+    - "vars['ceph_common_systemd']['mgr'] != None"
 - name: "ceph_common | Create override systemd service directory
     [ceph-exporter]"
   ansible.builtin.file:

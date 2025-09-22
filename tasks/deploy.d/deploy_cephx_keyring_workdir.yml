@@ -52,4 +52,6 @@
       cephx['type'] + '/ceph.keyring' }}"
   when:
     - "cephx['name'] is defined"
+    - "cephx['name'] != []"
     - "cephx['name'] != ''"
+    - "cephx['name'] != None"

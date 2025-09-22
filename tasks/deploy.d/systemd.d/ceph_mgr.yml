@@ -13,3 +13,4 @@
     - "vars['ceph_common_systemd']['mgr'] is defined"
     - "vars['ceph_common_systemd']['mgr'] != []"
     - "vars['ceph_common_systemd']['mgr'] != ''"
+    - "vars['ceph_common_systemd']['mgr'] != None"
