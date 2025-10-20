@@ -15,7 +15,7 @@
       cephx['type'] + '/ceph-' ~ cephx['name'] }}"
   when:
     - "cephx['name'] is defined"
-    - "cephx['name'] != ''"
+    - "cephx['name'] not in ['', [], None]"
 - name: "ceph_common | Deploy cephx keyring for Ceph client apps"
   ansible.builtin.template:
     src: "cephx_keyring.j2"
@@ -33,7 +33,7 @@
       cephx['type'] + '/ceph-' ~ cephx['name'] ~ '/keyring' }}"
   when:
     - "cephx['name'] is defined"
-    - "cephx['name'] != ''"
+    - "cephx['name'] not in ['', [], None]"
 - name: "ceph_common | Deploy cephx bootstrap keyring"
   ansible.builtin.template:
     src: "cephx_keyring.j2"
@@ -52,6 +52,4 @@
       cephx['type'] + '/ceph.keyring' }}"
   when:
     - "cephx['name'] is defined"
-    - "cephx['name'] != []"
-    - "cephx['name'] != ''"
-    - "cephx['name'] != None"
+    - "cephx['name'] not in ['', [], None]"

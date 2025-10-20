@@ -22,33 +22,25 @@
     file: "deploy.d/deploy_ceph_conf.yml"
   when:
     - "vars['ceph_common_settings'] is defined"
-    - "vars['ceph_common_settings'] != []"
-    - "vars['ceph_common_settings'] != ''"
-    - "vars['ceph_common_settings'] != None"
+    - "vars['ceph_common_settings'] not in ['', [], None]"
 - name: "ceph_common | Include systemd deployment tasks"
   ansible.builtin.include_tasks:
     file: "deploy.d/deploy_systemd_override.yml"
   when:
     - "vars['ceph_common_systemd'] is defined"
-    - "vars['ceph_common_systemd'] != []"
-    - "vars['ceph_common_systemd'] != ''"
-    - "vars['ceph_common_systemd'] != None"
+    - "vars['ceph_common_systemd'] not in ['', [], None]"
 - name: "ceph_common | Include rpdmap deployment tasks"
   ansible.builtin.include_tasks:
     file: "deploy.d/deploy_ceph_rbdmap.yml"
   when:
     - "vars['ceph_common_rbdmap'] is defined"
-    - "vars['ceph_common_rbdmap'] != []"
-    - "vars['ceph_common_rbdmap'] != ''"
-    - "vars['ceph_common_rbdmap'] != None"
+    - "vars['ceph_common_rbdmap'] not in ['', [], None]"
 - name: "ceph_common | Include cephx clients deployment tasks"
   ansible.builtin.include_tasks:
     file: "deploy.d/deploy_cephx_keyring_etc.yml"
   when:
     - "vars['ceph_common_keyrings_clients'] is defined"
-    - "vars['ceph_common_keyrings_clients'] != []"
-    - "vars['ceph_common_keyrings_clients'] != ''"
-    - "vars['ceph_common_keyrings_clients'] != None"
+    - "vars['ceph_common_keyrings_clients'] not in ['', [], None]"
 - name: "ceph_common | Include cephx apps deployment tasks"
   ansible.builtin.import_tasks:
     file: "deploy.d/deploy_cephx_keyring_workdir.yml"

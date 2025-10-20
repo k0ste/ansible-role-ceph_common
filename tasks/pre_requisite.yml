@@ -37,6 +37,9 @@
       default(omit) }}"
     ceph_common_rbdmap: "{{ hostvars[inventory_hostname]['ceph_common'] |
       community.general.json_query('[].rbdmap[]') | default(omit) }}"
+  when:
+    - "hostvars[inventory_hostname]['ceph_common'] is defined"
+    - "hostvars[inventory_hostname]['ceph_common'] not in ['', [], None]"
 - name: "ceph_common | Assert that ceph_common package state in valid value"
   ansible.builtin.assert:
     that:
@@ -45,21 +48,20 @@
     quiet: "true"
   when:
     - "vars['ceph_common_package_state'] is defined"
-    - "vars['ceph_common_package_state'] != []"
-    - "vars['ceph_common_package_state'] != ''"
-    - "vars['ceph_common_package_state'] != None"
+    - "vars['ceph_common_package_state'] not in ['', [], None]"
 - name: "ceph_common | Set ceph_common package state to present state from
     empty state"
   ansible.builtin.set_fact:
     ceph_common_package_state: 'present'
   when:
     - "vars['ceph_common_package_state'] is defined"
-    - "vars['ceph_common_package_state'] == []"
-    - "vars['ceph_common_package_state'] == ''"
-    - "vars['ceph_common_package_state'] == None"
+    - "vars['ceph_common_package_state'] not in ['', [], None]"
 - name: "ceph_common | Import RGW cert checks"
-  ansible.builtin.import_tasks:
+  ansible.builtin.include_tasks:
     file: "prereq.d/rgw_cert_checks.yml"
+  when:
+    - "vars['ceph_common_rgw_certificate'] is defined"
+    - "vars['ceph_common_rgw_certificate'] not in ['', [], None]"
 - name: "ceph_common | Create conf.d catalogs"
   ansible.builtin.file:
     path: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] }}"
@@ -89,9 +91,7 @@
       ceph_dir }}"
   when:
     - "ceph_dir is defined"
-    - "ceph_dir != []"
-    - "ceph_dir != ''"
-    - "ceph_dir != None"
+    - "ceph_dir not in ['', [], None]"
 - name: "ceph_common | Create override systemd service directory [ceph-mgr]"
   ansible.builtin.file:
     path: "{{ vars['ceph_common_systemd_dir'] + '/ceph-mgr@.service.d' }}"
@@ -102,9 +102,7 @@
     recurse: "no"
   when:
     - "vars['ceph_common_systemd']['mgr'] is defined"
-    - "vars['ceph_common_systemd']['mgr'] != []"
-    - "vars['ceph_common_systemd']['mgr'] != ''"
-    - "vars['ceph_common_systemd']['mgr'] != None"
+    - "vars['ceph_common_systemd']['mgr'] not in ['', [], None]"
 - name: "ceph_common | Create override systemd service directory
     [ceph-exporter]"
   ansible.builtin.file:
