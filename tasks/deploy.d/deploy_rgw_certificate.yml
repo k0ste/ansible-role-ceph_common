@@ -2,10 +2,10 @@
 - name: "ceph_common | Deploy RGW certificate"
   ansible.builtin.copy:
     content: "{{ ceph_common_rgw_certificate_content['data'] }}"
-    dest: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] + '/' +
+    dest: "{{ lookup('ansible.builtin.vars', 'ceph_common_conf_dest') + '/' +
       ceph_common_rgw_certificate_content['name'] }}"
-    owner: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
-    group: "{{ hostvars[inventory_hostname]['ceph_common_user_id'] }}"
+    owner: "{{ lookup('ansible.builtin.vars', 'ceph_common_user_id') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'ceph_common_user_id') }}"
     mode: "0400"
   vars:
     ceph_common_rgw_certificate_content: "{{ lookup('ansible.builtin.vars',

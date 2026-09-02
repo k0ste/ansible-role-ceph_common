@@ -5,6 +5,6 @@
 {{ '[Service]' }}
 {% for o in lookup('ansible.builtin.vars', 'ceph_common_systemd')['mgr'] %}
 {% for k,v in o.items() %}
-{{ (k.split('_') | map('capitalize') | join) + '=' + v }}
+{{ (k.split('_') | map('capitalize') | join()) + '=' + v }}
 {% endfor %}
 {% endfor %}

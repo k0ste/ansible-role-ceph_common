@@ -2,7 +2,7 @@
 - name: "ceph_common | Deploy rbdmap image spec"
   ansible.builtin.template:
     src: "rbdmap.j2"
-    dest: "{{ hostvars[inventory_hostname]['ceph_common_conf_dest'] +
+    dest: "{{ lookup('ansible.builtin.vars', 'ceph_common_conf_dest') +
       '/rbdmap' }}"
     force: "yes"
     owner: "root"
@@ -13,9 +13,9 @@
     name: "rbdmap"
     enabled: "yes"
   when:
-    - "hostvars[inventory_hostname]['ceph_common'] is defined"
-    - "hostvars[inventory_hostname]['ceph_common'] not in ['', [], '[]', None]"
-    - "hostvars[inventory_hostname]['ceph_common'] |
+    - "lookup('ansible.builtin.vars', 'ceph_common', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ceph_common') |
        community.general.json_query(lookup('ansible.builtin.vars',
        'ceph_common_rbdmap_enable', default='')) == 'true'"
   vars:

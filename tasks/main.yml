@@ -6,9 +6,9 @@
   ansible.builtin.include_tasks:
     file: "packages.yml"
   when:
-    - "hostvars[inventory_hostname]['ceph_common'] is defined"
-    - "hostvars[inventory_hostname]['ceph_common'] not in ['', [], '[]', None]"
-    - "hostvars[inventory_hostname]['ceph_common'] |
+    - "lookup('ansible.builtin.vars', 'ceph_common', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ceph_common') |
        community.general.json_query(lookup('ansible.builtin.vars',
       'ceph_common_install_package', default='')) == 'true'"
   vars:

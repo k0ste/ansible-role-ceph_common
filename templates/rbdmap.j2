@@ -96,6 +96,9 @@
   'prefer-crc', 'prefer-secure'] %}
 {{ 'ms_mode=' + ro['ms_mode'] + ',' -}}
 {% endif %}
+{% if ro['rxbounce'] is defined and ro['rxbounce'] == 'true' %}
+{{ 'rxbounce,' -}}
+{% endif %}
 {% if ro['udev'] is defined and ro['udev'] == 'true' %}
 {{ 'udev,' -}}
 {% endif %}

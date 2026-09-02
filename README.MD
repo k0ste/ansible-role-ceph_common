@@ -6,11 +6,12 @@ Role for deploy:
 * `ceph.conf` configuration
 * `cephx` auth keys
 * `radosgw` rsa certificate bundles
+* `ceph-exporter` command-line configuration
 * `rbdmap` spec files
 
 ## Requirements
 
-* Ansible 3.0.0+
+* Ansible 9.0.0+
 
 Example configuration
 -------------------------
@@ -33,15 +34,15 @@ ceph_common:
       - mgr:
 # Set memory limit (may be bytes or percents)
           - memory_max: '40%'
-# Set ceph-exporter service override
-# See: https://tracker.ceph.com/issues/71922
-        exporter_hotfix: 'true'
     settings:
 # [global] in ceph.conf, all options passed as-is without any validation
       - global:
           - mon_host: '10.10.10.2:3300,10.10.10.3:3300,10.10.10.4:3300'
             public_network: '10.10.10.0/24'
             fsid: '8ca762db-c2a8-4008-a7f1-750be9e3eaaf'
+# [mon] section in ceph.conf
+        mon:
+          - pid_file: '$run_dir/$cluster-$type.$id.pid'
 # "global" [client] in ceph.conf
         client:
 # [client.<name>] in ceph.conf
@@ -71,7 +72,36 @@ ceph_common:
         key: '<key>'
       - name: "{{ inventory_hostname_short }}"
         type: 'mgr'
-        key: "{{ ceph_common_keyrings_mgr_keyring | default(omit) }}"
+        key: "{{ lookup('ansible.builtin.vars',
+          'ceph_common_keyrings_mgr_keyring') | default(omit) }}"
+# ceph-exporter Prometheus application settings
+    exporter:
+# The path to Ceph daemon sockets (*.asok)
+      - socket_dir: '/some/nondefault/dir'
+# Host IP address on which the exporter is to listen (default is '0.0.0.0')
+        address: '192.168.1.1'
+# TCP Port on which the exporter is to listen. Default is 9926
+        port: '9926'
+# Path to the certificate file when using HTTPS
+        cert_file: '/etc/pki/tls/private/le/fullchain.pem'
+# Path to the certificate key file when using HTTPS
+        key_file: '/etc/pki/tls/private/le/privkey.pem'
+# Only perf counters greater than or equal to prio-limit are fetched
+        prio_limit: '5'
+# Interval between daemon scrapes in seconds (default is '5')
+        stats_period: '5'
+# Read configuration from the given configuration file
+        conf: '/etc/ceph/ceph.conf'
+# Undocumented option - this means do not connect to cluster it all. The
+# exporter actually read UNIX sockets, and exports HTTP interface
+        no_mon_config: 'true'
+# Use this ID as ceph.client name (seems)
+# Or put '%i' here, if you really need client connection to ceph-mon
+        id: 'admin'
+# Not documented
+        name: 'admin?'
+# Set cluster name (default is 'ceph')
+        cluster: 'ceph'
 # RBD spec file for rbdmap service
     rbdmap:
       - pool: 'rbd'
@@ -193,6 +223,11 @@ ceph_common:
 # (since 5.11). If the daemon denies 'secure' mode in favor of 'crc' mode, agree
 # to 'crc' mode
             ms_mode: 'prefer-crc'
+# Use a bounce buffer when receiving data (since 5.17). The default behaviour is
+# to read directly into the destination buffer. A bounce buffer is needed if the
+# destination buffer isn't guaranteed to be stable (i.e. remain unchanged while
+# it is being read to)
+            rxbounce: 'true'
 # Wait for udev device manager to finish executing all matching "add" rules and
 # release the device before exiting (default). This option is not passed to the
 # kernel

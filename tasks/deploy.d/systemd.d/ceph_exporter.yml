@@ -3,12 +3,23 @@
   ansible.builtin.template:
     src: "ceph_exporter_service.j2"
     dest: "{{ lookup('ansible.builtin.vars', 'ceph_common_systemd_dir') +
-      '/ceph-exporter.service.d/override.conf' }}"
+      '/' + ceph_common_exporter_systemd_override + '/override.conf' }}"
     owner: "root"
     group: "root"
     mode: "0644"
+  # This loop for compat - Reef and Squid releases have a bug in service name,
+  # that fixed in Tentacle release. So, for some time we should deploy in both
+  # places. https://tracker.ceph.com/issues/74445
+  loop:
+    - 'ceph-exporter.service.d'
+    - 'ceph-exporter@.service.d'
+  loop_control:
+    label: "{{ 'Deploy systemd override file: ' + lookup('ansible.builtin.vars',
+      'ceph_common_systemd_dir') + '/' + ceph_common_exporter_systemd_override +
+      '/override.conf' }}"
+    loop_var: 'ceph_common_exporter_systemd_override'
   notify:
     - "Daemon reload"
   when:
-    - "(lookup('ansible.builtin.vars',
-      'ceph_common_systemd')['exporter_hotfix'] | default('')) in 'true'"
+    - "lookup('ansible.builtin.vars', 'ceph_common_exporter', default='')
+      not in ['', [], '[]', None]"

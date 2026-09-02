@@ -1,8 +1,78 @@
-{{ '## ceph-exporter.service' }}
+{{ '## ' + ceph_common_exporter_systemd_override }}
+{% if not '@' in ceph_common_exporter_systemd_override %}
+{{ '# This file is for compat with Reef and Squid releases' }}
+{{ '# https://tracker.ceph.com/issues/74445' }}
+{% endif %}
 {{ '# ' + ansible_managed }}
 {{ '# Do not edit manually' }}
 
+{% if lookup('ansible.builtin.vars', 'ceph_common_exporter', default='')
+  not in ['', [], '[]', None] %}
 {{ '[Service]' }}
 {{ 'ExecStart=' }}
-{{ 'ExecStart=/usr/bin/ceph-exporter -f --setuser ceph --setgroup ceph \
---no-mon-config' }}
+{{ 'ExecStart=/usr/bin/ceph-exporter -f' -}}
+{{ ' \\' }}
+{{ ' --setuser=\"ceph\"' -}}
+{{ ' \\' }}
+{{ ' --setgroup=\"ceph\"' -}}
+{% for o in lookup('ansible.builtin.vars', 'ceph_common_exporter') %}
+{% if o['socket_dir'] is defined and o['socket_dir']
+  not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --sock-dir=\"' + o['socket_dir'] + '\"' -}}
+{% endif %}
+{% if o['address'] is defined and o['address']
+  not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --addrs=\"' + o['address'] + '\"' -}}
+{% endif %}
+{% if o['port'] is defined and o['port'] not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --port=\"' + o['port'] + '\"' -}}
+{% endif %}
+{% if not '@' in ceph_common_exporter_systemd_override %}
+{% if o['cert_file'] is defined and o['cert_file']
+  not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --cert-file=\"' + o['cert_file'] + '\"' -}}
+{% endif %}
+{% if o['key_file'] is defined and o['key_file'] not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --key-file=\"' + o['key_file'] + '\"' -}}
+{% endif %}
+{% endif %}
+{% if o['prio_limit'] is defined and o['prio_limit']
+  not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --prio-limit=\"' + o['prio_limit'] + '\"' -}}
+{% endif %}
+{% if o['stats_period'] is defined and o['stats_period']
+  not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --stats-period=\"' + o['stats_period'] + '\"' -}}
+{% endif %}
+{% if o['conf'] is defined and o['conf'] not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --conf=\"' + o['conf'] + '\"' -}}
+{% endif %}
+{% if o['id'] is defined and o['id'] not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --id=\"' + o['id'] + '\"' -}}
+{% endif %}
+{% if o['name'] is defined and o['name'] not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --name=\"' + o['name'] + '\"' -}}
+{% endif %}
+{% if o['cluster'] is defined and o['cluster'] not in ['', [], '[]', None] %}
+{{ ' \\' }}
+{{ ' --cluster=\"' + o['cluster'] + '\"' -}}
+{% endif %}
+{% if o['no_mon_config'] is defined and o['no_mon_config'] == 'true' %}
+{{ ' \\' }}
+{{ ' --no-mon-config' -}}
+{% endif %}
+{% if loop['last'] %}
+{{ '' }}
+{% endif %}
+{% endfor %}
+{% endif %}

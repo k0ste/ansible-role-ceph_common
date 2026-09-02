@@ -8,7 +8,7 @@
         update_cache: "yes"
     - name: "ceph_common | Install package with dnf"
       ansible.builtin.dnf:
-        name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+        name: "{{ lookup('ansible.builtin.vars', 'ceph_common_package') }}"
         state: "{{ lookup('ansible.builtin.vars',
           'ceph_common_package_state') }}"
 - name: "ceph_common | Install the required packages in Debian derivatives"
@@ -20,7 +20,7 @@
         update_cache: "yes"
     - name: "ceph_common | Install package with apt"
       ansible.builtin.apt:
-        name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+        name: "{{ lookup('ansible.builtin.vars', 'ceph_common_package') }}"
         state: "{{ lookup('ansible.builtin.vars',
           'ceph_common_package_state') }}"
 - name: "ceph_common | Install the required packages in ArchLinux derivatives"
@@ -33,6 +33,6 @@
         update_cache: "yes"
     - name: "ceph_common | Install package with pacman"
       community.general.pacman:
-        name: "{{ hostvars[inventory_hostname]['ceph_common_package'] }}"
+        name: "{{ lookup('ansible.builtin.vars', 'ceph_common_package') }}"
         state: "{{ lookup('ansible.builtin.vars',
           'ceph_common_package_state') }}"
